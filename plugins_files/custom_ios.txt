@@ -1,0 +1,113 @@
+<!---------------------CustomPlugins.h----------------------->
+#import <Cordova/CDV.h>
+#import "MainViewController.h"
+
+
+@interface CustomPlugins : CDVPlugin{
+     //GADBannerView *bannerView_;
+}
+
+- (void)echo:(CDVInvokedUrlCommand*)command;
+
+@end
+
+<!-------------------CustomPlugins.m---------------------------------->
+
+#import "CustomPlugins.h"
+#import <Cordova/CDV.h>
+#import "globalvar.h"
+
+@implementation CustomPlugins
+
+- (void)echo:(CDVInvokedUrlCommand*)command
+{
+    
+    
+    
+    CDVPluginResult* pluginResult = nil;
+    //NSString* echo = [command.arguments objectAtIndex:0];
+    globalvar *obj=[globalvar getInstance];
+    
+    
+    NSLog(@"ob---------->%@",obj.str);
+    NSString* echo = obj.str;
+    NSLog(@"echo value is----> %@",command.arguments);
+    
+    if (echo != nil && [echo length] > 0) {
+        pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:echo];
+    } else {
+        pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR];
+    }
+    
+    [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
+}
+
+@end
+
+<!------------------CustomPlugins.js----------------------------------------->
+ (function() {
+  
+  var cordovaRef = window.PhoneGap || window.Cordova || window.cordova; // old to new fallbacks
+  
+  function CustomPlugins() {
+  // Does nothing
+  }
+  
+  
+  CustomPlugins.prototype.callPlugin = function(loc,callback)
+  {
+  //alert(loc[0]);
+  cordovaRef.exec(callback,false,"CustomPlugins","echo", [loc]);//string
+  //cordovaRef.exec(callback,false,"CustomPlugins","echo", loc);//Array
+  
+  
+  };
+  
+
+  
+  // Note: this plugin does NOT install itself, call this method some time after deviceready to install it
+  // it will be returned, and also available globally from window.plugins.childBrowser
+  CustomPlugins.install = function()
+  {
+  if(!window.plugins) {
+  window.plugins = {};
+  }
+  if ( ! window.plugins.CustomPlugins ) {
+  window.plugins.CustomPlugins = new CustomPlugins();
+  }
+  
+  };
+  
+  
+  if (cordovaRef && cordovaRef.addConstructor) {
+  cordovaRef.addConstructor(CustomPlugins.install);
+  } else {
+  console.log("customplugin Cordova Plugin could not be installed.");
+  return null;
+  }
+  
+  
+  })();
+
+
+<!--------------------call in index.js-------------------------------------->
+
+  var aarray_arg=['ok','done'];
+        var single_arg='ok'
+        
+        window.plugins.CustomPlugins.callPlugin(single_arg,function(res){
+                                                alert(res);
+                                                });
+        
+        /*
+        window.plugins.CustomPlugins.callPlugin(aarray_arg,function(res){
+                                                  alert(res);
+                });
+         */
+
+
+<!--------------------in config.xml------------------------------------>
+
+  <feature name="CustomPlugins">
+        <param name="ios-package" value="CustomPlugins" />
+    </feature>
